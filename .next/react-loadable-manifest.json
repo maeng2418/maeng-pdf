@@ -1,0 +1,69 @@
+{
+  "components/FileUpload.tsx -> @/lib/pdf-converter": {
+    "id": 60406,
+    "files": [
+      "static/chunks/452e1f16.1cb5d02c821561d0.js",
+      "static/chunks/658.553dca103409f444.js",
+      "static/chunks/406.5cdd68e3109986a4.js"
+    ]
+  },
+  "components/PDFMerger.tsx -> @/lib/pdf-merger": {
+    "id": 88524,
+    "files": [
+      "static/chunks/366.b326775ad3fc7936.js",
+      "static/chunks/524.590e3284f4757a49.js"
+    ]
+  },
+  "components/PDFSplitter.tsx -> @/lib/pdf-splitter": {
+    "id": 38273,
+    "files": [
+      "static/chunks/366.b326775ad3fc7936.js",
+      "static/chunks/273.ab449de5f2bc693a.js"
+    ]
+  },
+  "components/PDFSplitter.tsx -> jszip": {
+    "id": 53987,
+    "files": [
+      "static/chunks/987.a2f1c761f610ecf4.js"
+    ]
+  },
+  "lib/pdf-converter.ts -> jszip": {
+    "id": 53987,
+    "files": [
+      "static/chunks/987.a2f1c761f610ecf4.js"
+    ]
+  },
+  "lib/pdf-converter.ts -> mammoth": {
+    "id": 76183,
+    "files": [
+      "static/chunks/987.a2f1c761f610ecf4.js",
+      "static/chunks/183.afeaa93aceacc992.js"
+    ]
+  },
+  "lib/pdf-converter.ts -> xlsx": {
+    "id": 8629,
+    "files": [
+      "static/chunks/147b5626.0365c04d9d3e7e48.js",
+      "static/chunks/914.0fc742ddbae542fe.js"
+    ]
+  },
+  "node_modules/.pnpm/jspdf@2.5.2/node_modules/jspdf/dist/jspdf.es.min.js -> canvg": {
+    "id": 28756,
+    "files": [
+      "static/chunks/badf541d.ea8dd0c970782b2a.js",
+      "static/chunks/283.18ccdc69ccf309c1.js"
+    ]
+  },
+  "node_modules/.pnpm/jspdf@2.5.2/node_modules/jspdf/dist/jspdf.es.min.js -> dompurify": {
+    "id": 11440,
+    "files": [
+      "static/chunks/440.49292300c7f870da.js"
+    ]
+  },
+  "node_modules/.pnpm/jspdf@2.5.2/node_modules/jspdf/dist/jspdf.es.min.js -> html2canvas": {
+    "id": 55773,
+    "files": [
+      "static/chunks/c132bf7d.016aec82f018c25f.js"
+    ]
+  }
+}

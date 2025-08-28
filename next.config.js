@@ -1,34 +1,21 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  reactStrictMode: false,
   experimental: {
-    turbo: {
-      rules: {
-        '*.svg': {
-          loaders: ['@svgr/webpack'],
-          as: '*.js',
-        },
-      },
-    },
+    appDir: true,
   },
-  webpack: (config) => {
-    config.externals = [...config.externals, 'canvas'];
-    
-    config.module.rules.push({
-      test: /\.worker\.(js|ts)$/,
-      use: {
-        loader: 'worker-loader',
-        options: {
-          filename: 'static/[hash].worker.js',
-          publicPath: '/_next/',
-        },
-      },
-    });
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.externals = config.externals || [];
+      config.externals.push('canvas');
+    }
 
     config.resolve.fallback = {
       ...config.resolve.fallback,
       fs: false,
       net: false,
       tls: false,
+      child_process: false,
     };
 
     return config;

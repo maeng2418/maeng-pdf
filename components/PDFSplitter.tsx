@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -51,69 +53,115 @@ export const PDFSplitter = () => {
     setIsSplitting(true);
     setSplitProgress(0);
 
-    // 분할 시뮬레이션
-    const interval = setInterval(() => {
-      setSplitProgress(prev => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          setIsSplitting(false);
-          
-          // 분할 결과 시뮬레이션
-          const results: SplitResult[] = [];
-          if (splitMode === "pages") {
-            const numFiles = Math.ceil(10 / pagesPerFile); // 가정: 10페이지 PDF
-            for (let i = 0; i < numFiles; i++) {
-              const startPage = i * pagesPerFile + 1;
-              const endPage = Math.min((i + 1) * pagesPerFile, 10);
-              results.push({
-                fileName: `${selectedFile.name.replace('.pdf', '')}_part${i + 1}.pdf`,
-                pages: `${startPage}-${endPage}`,
-                size: `${(Math.random() * 500 + 100).toFixed(0)} KB`
-              });
-            }
-          } else if (splitMode === "range") {
-            const ranges = pageRanges.split(',').map(r => r.trim());
-            ranges.forEach((range, index) => {
-              results.push({
-                fileName: `${selectedFile.name.replace('.pdf', '')}_range${index + 1}.pdf`,
-                pages: range,
-                size: `${(Math.random() * 500 + 100).toFixed(0)} KB`
-              });
-            });
-          } else if (splitMode === "single") {
-            for (let i = 1; i <= 10; i++) { // 가정: 10페이지
-              results.push({
-                fileName: `${selectedFile.name.replace('.pdf', '')}_page${i}.pdf`,
-                pages: `${i}`,
-                size: `${(Math.random() * 200 + 50).toFixed(0)} KB`
-              });
-            }
-          }
-          
-          setSplitResults(results);
-          toast({
-            title: "분할 완료!",
-            description: `PDF가 ${results.length}개 파일로 분할되었습니다.`,
-          });
-          return 100;
-        }
-        return prev + Math.random() * 12;
+    try {
+      const { PDFSplitter } = await import("@/lib/pdf-splitter");
+      
+      // 진행률 시뮬레이션
+      const progressInterval = setInterval(() => {
+        setSplitProgress(prev => Math.min(prev + Math.random() * 12, 90));
+      }, 300);
+
+      const splitOptions = {
+        mode: splitMode as any,
+        pagesPerFile: pagesPerFile,
+        ranges: pageRanges
+      };
+
+      const results = await PDFSplitter.splitPDF(selectedFile, splitOptions);
+      
+      clearInterval(progressInterval);
+      setSplitProgress(100);
+
+      // SplitResult를 UI에서 사용하는 형태로 변환
+      const uiResults: SplitResult[] = results.map(result => ({
+        fileName: result.fileName,
+        pages: result.pageInfo,
+        size: `${(result.blob.size / 1024).toFixed(0)} KB`
+      }));
+
+      setSplitResults(uiResults);
+
+      // 분할된 파일들을 저장하여 다운로드할 수 있게 함
+      const splitResultsWithBlobs = results.map(result => ({
+        ...result,
+        url: URL.createObjectURL(result.blob)
+      }));
+
+      // 전역 상태나 ref에 저장 (다운로드용)
+      (window as any).splitResults = splitResultsWithBlobs;
+
+      setIsSplitting(false);
+      
+      toast({
+        title: "분할 완료!",
+        description: `PDF가 ${results.length}개 파일로 분할되었습니다.`,
       });
-    }, 300);
+    } catch (error) {
+      setIsSplitting(false);
+      setSplitProgress(0);
+      
+      toast({
+        title: "분할 실패",
+        description: error instanceof Error ? error.message : "분할 중 오류가 발생했습니다.",
+        variant: "destructive",
+      });
+    }
   };
 
   const downloadFile = (fileName: string) => {
+    const splitResults = (window as any).splitResults;
+    if (splitResults) {
+      const result = splitResults.find((r: any) => r.fileName === fileName);
+      if (result) {
+        const a = document.createElement('a');
+        a.href = result.url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      }
+    }
+    
     toast({
       title: "다운로드 시작",
       description: `${fileName}을 다운로드합니다.`,
     });
   };
 
-  const downloadAll = () => {
-    toast({
-      title: "전체 다운로드",
-      description: "모든 분할된 파일을 ZIP으로 다운로드합니다.",
-    });
+  const downloadAll = async () => {
+    const splitResults = (window as any).splitResults;
+    if (!splitResults) return;
+
+    try {
+      const zipModule = await import('jszip');
+      const JSZip = zipModule.default;
+      const zip = new JSZip();
+
+      for (const result of splitResults) {
+        zip.file(result.fileName, result.blob);
+      }
+
+      const zipBlob = await zip.generateAsync({ type: 'blob' });
+      const url = URL.createObjectURL(zipBlob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'split-pdfs.zip';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      toast({
+        title: "전체 다운로드 완료",
+        description: "모든 분할된 파일을 ZIP으로 다운로드했습니다.",
+      });
+    } catch (error) {
+      toast({
+        title: "다운로드 실패",
+        description: "ZIP 파일 생성 중 오류가 발생했습니다.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (

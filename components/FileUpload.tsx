@@ -1,3 +1,5 @@
+"use client";
+
 import { useState, useCallback } from "react";
 import { useDropzone } from "react-dropzone";
 import { Card } from "@/components/ui/card";
@@ -65,10 +67,16 @@ export const FileUpload = ({ acceptedTypes, conversionType }: FileUploadProps) =
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
-    accept: acceptedTypes.split(",").reduce((acc, type) => {
-      acc[type.trim()] = [];
-      return acc;
-    }, {} as Record<string, string[]>),
+    accept: {
+      'image/*': ['.jpg', '.jpeg', '.png', '.bmp', '.tiff', '.gif'],
+      'application/pdf': ['.pdf'],
+      'application/msword': ['.doc'],
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
+      'application/vnd.ms-excel': ['.xls'],
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
+      'application/vnd.ms-powerpoint': ['.ppt'],
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation': ['.pptx']
+    },
     multiple: true,
   });
 
@@ -88,14 +96,49 @@ export const FileUpload = ({ acceptedTypes, conversionType }: FileUploadProps) =
 
     setIsConverting(true);
     
-    // 변환 시뮬레이션
-    setTimeout(() => {
+    try {
+      const { PDFConverter } = await import("@/lib/pdf-converter");
+      const fileList = files.map(f => f.file);
+      let resultBlob: Blob;
+
+      if (conversionType === "to-pdf") {
+        const imageFiles = fileList.filter(file => PDFConverter.isImageFile(file));
+        const wordFiles = fileList.filter(file => PDFConverter.isWordFile(file));
+        const excelFiles = fileList.filter(file => PDFConverter.isExcelFile(file));
+
+        if (imageFiles.length > 0) {
+          resultBlob = await PDFConverter.imagesToPDF(imageFiles);
+        } else if (wordFiles.length > 0) {
+          resultBlob = await PDFConverter.wordToPDF(wordFiles[0]);
+        } else if (excelFiles.length > 0) {
+          resultBlob = await PDFConverter.excelToPDF(excelFiles[0]);
+        } else {
+          throw new Error("지원되지 않는 파일 형식입니다.");
+        }
+
+        const url = URL.createObjectURL(resultBlob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'converted.pdf';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+
       setIsConverting(false);
       toast({
         title: "변환 완료!",
         description: "파일이 성공적으로 변환되었습니다.",
       });
-    }, 3000);
+    } catch (error) {
+      setIsConverting(false);
+      toast({
+        title: "변환 실패",
+        description: error instanceof Error ? error.message : "변환 중 오류가 발생했습니다.",
+        variant: "destructive",
+      });
+    }
   };
 
   return (

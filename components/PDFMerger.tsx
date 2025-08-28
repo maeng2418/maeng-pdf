@@ -1,3 +1,5 @@
+"use client";
+
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -78,22 +80,48 @@ export const PDFMerger = () => {
     setIsMerging(true);
     setMergeProgress(0);
 
-    // 병합 시뮬레이션
-    const interval = setInterval(() => {
-      setMergeProgress(prev => {
-        if (prev >= 100) {
-          clearInterval(interval);
-          setIsMerging(false);
-          setMergedFile("merged-document.pdf");
-          toast({
-            title: "병합 완료!",
-            description: "PDF 파일이 성공적으로 병합되었습니다.",
-          });
-          return 100;
-        }
-        return prev + Math.random() * 15;
+    try {
+      const { PDFMerger } = await import("@/lib/pdf-merger");
+      
+      const sortedFiles = files.sort((a, b) => a.order - b.order);
+      const fileList = sortedFiles.map(f => f.file);
+
+      // 진행률 시뮬레이션
+      const progressInterval = setInterval(() => {
+        setMergeProgress(prev => Math.min(prev + Math.random() * 15, 90));
+      }, 200);
+
+      const mergedBlob = await PDFMerger.mergePDFs(fileList);
+      
+      clearInterval(progressInterval);
+      setMergeProgress(100);
+
+      const url = URL.createObjectURL(mergedBlob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'merged-document.pdf';
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+
+      setIsMerging(false);
+      setMergedFile("merged-document.pdf");
+      
+      toast({
+        title: "병합 완료!",
+        description: "PDF 파일이 성공적으로 병합되었습니다.",
       });
-    }, 200);
+    } catch (error) {
+      setIsMerging(false);
+      setMergeProgress(0);
+      
+      toast({
+        title: "병합 실패",
+        description: error instanceof Error ? error.message : "병합 중 오류가 발생했습니다.",
+        variant: "destructive",
+      });
+    }
   };
 
   const downloadMerged = () => {
