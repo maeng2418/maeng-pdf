@@ -53,9 +53,9 @@ export class PDFConverter {
       const pageHeight = pdf.internal.pageSize.getHeight();
 
       const img = new Image();
-      await new Promise((resolve, reject) => {
-        img.onload = resolve;
-        img.onerror = reject;
+      await new Promise<void>((resolve, reject) => {
+        img.onload = () => resolve();
+        img.onerror = () => reject(new Error('이미지 로드 실패'));
         img.src = imageDataUrl;
       });
 
@@ -92,7 +92,8 @@ export class PDFConverter {
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
       const pdfBlob = await this.createSinglePDFFromImages([file], options);
-      const fileName = `${file.name.split('.')[0]}.pdf`;
+      const baseName = file.name.split('.')[0] || 'converted';
+      const fileName = `${baseName}.pdf`;
       zip.file(fileName, pdfBlob);
     }
 
@@ -102,8 +103,15 @@ export class PDFConverter {
   private static fileToDataURL(file: File): Promise<string> {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.onload = (e) => resolve(e.target?.result as string);
-      reader.onerror = reject;
+      reader.onload = (e) => {
+        const result = e.target?.result;
+        if (typeof result === 'string') {
+          resolve(result);
+        } else {
+          reject(new Error('파일을 읽는데 실패했습니다.'));
+        }
+      };
+      reader.onerror = () => reject(new Error('파일 읽기 중 오류가 발생했습니다.'));
       reader.readAsDataURL(file);
     });
   }
@@ -134,7 +142,8 @@ export class PDFConverter {
 
       return new Blob([pdf.output('blob')], { type: 'application/pdf' });
     } catch (error) {
-      throw new Error(`Word 변환 중 오류가 발생했습니다: ${error}`);
+      const errorMessage = error instanceof Error ? error.message : '알 수 없는 오류';
+      throw new Error(`Word 변환 중 오류가 발생했습니다: ${errorMessage}`);
     }
   }
 
@@ -182,7 +191,8 @@ export class PDFConverter {
 
       return new Blob([pdf.output('blob')], { type: 'application/pdf' });
     } catch (error) {
-      throw new Error(`Excel 변환 중 오류가 발생했습니다: ${error}`);
+      const errorMessage = error instanceof Error ? error.message : '알 수 없는 오류';
+      throw new Error(`Excel 변환 중 오류가 발생했습니다: ${errorMessage}`);
     }
   }
 

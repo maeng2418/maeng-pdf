@@ -31,7 +31,7 @@ export const PDFSplitter = () => {
     if (file && file.type === 'application/pdf') {
       setSelectedFile(file);
       setSplitResults([]);
-    } else {
+    } else if (file) {
       toast({
         title: "잘못된 파일 형식",
         description: "PDF 파일만 업로드할 수 있습니다.",
@@ -88,7 +88,7 @@ export const PDFSplitter = () => {
       }));
 
       // 전역 상태나 ref에 저장 (다운로드용)
-      (window as any).splitResults = splitResultsWithBlobs;
+      (window as Window & { splitResults?: typeof splitResultsWithBlobs }).splitResults = splitResultsWithBlobs;
 
       setIsSplitting(false);
       
@@ -109,9 +109,9 @@ export const PDFSplitter = () => {
   };
 
   const downloadFile = (fileName: string) => {
-    const splitResults = (window as any).splitResults;
+    const splitResults = (window as Window & { splitResults?: Array<{ fileName: string; url: string; blob: Blob }> }).splitResults;
     if (splitResults) {
-      const result = splitResults.find((r: any) => r.fileName === fileName);
+      const result = splitResults.find((r) => r.fileName === fileName);
       if (result) {
         const a = document.createElement('a');
         a.href = result.url;
@@ -129,7 +129,7 @@ export const PDFSplitter = () => {
   };
 
   const downloadAll = async () => {
-    const splitResults = (window as any).splitResults;
+    const splitResults = (window as Window & { splitResults?: Array<{ fileName: string; url: string; blob: Blob }> }).splitResults;
     if (!splitResults) return;
 
     try {

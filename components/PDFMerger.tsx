@@ -22,7 +22,10 @@ export const PDFMerger = () => {
   const { toast } = useToast();
 
   const handleFileUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const uploadedFiles = Array.from(event.target.files || []);
+    const fileList = event.target.files;
+    if (!fileList) return;
+    
+    const uploadedFiles = Array.from(fileList);
     const pdfFiles = uploadedFiles.filter(file => file.type === 'application/pdf');
     
     if (pdfFiles.length !== uploadedFiles.length) {
@@ -35,7 +38,7 @@ export const PDFMerger = () => {
 
     const newFiles = pdfFiles.map((file, index) => ({
       file,
-      id: Math.random().toString(36).substr(2, 9),
+      id: Math.random().toString(36).substring(2, 11),
       order: files.length + index,
     }));
 

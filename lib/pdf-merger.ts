@@ -24,7 +24,8 @@ export class PDFMerger {
       const bytes = await file.arrayBuffer();
       await PDFDocument.load(bytes);
       return true;
-    } catch (error) {
+    } catch (error: unknown) {
+      console.warn('PDF validation failed:', error instanceof Error ? error.message : 'Unknown error');
       return false;
     }
   }

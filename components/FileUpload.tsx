@@ -30,7 +30,7 @@ export const FileUpload = ({ acceptedTypes, conversionType }: FileUploadProps) =
     (acceptedFiles: File[]) => {
       const newFiles = acceptedFiles.map((file) => ({
         file,
-        id: Math.random().toString(36).substr(2, 9),
+        id: Math.random().toString(36).substring(2, 11),
         progress: 0,
         status: "uploading" as const,
       }));
@@ -55,7 +55,7 @@ export const FileUpload = ({ acceptedTypes, conversionType }: FileUploadProps) =
           } else {
             setFiles((prev) =>
               prev.map((f) =>
-                f.id === uploadFile.id ? { ...f, progress } : f
+                f.id === uploadFile.id ? { ...f, progress: Math.floor(progress) } : f
               )
             );
           }

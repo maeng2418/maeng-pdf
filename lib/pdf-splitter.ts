@@ -132,15 +132,19 @@ export class PDFSplitter {
     const pageIndices: number[] = [];
 
     if (range.includes('-')) {
-      const [start, end] = range.split('-').map(n => parseInt(n.trim()) - 1);
-      if (!isNaN(start) && !isNaN(end) && start <= end) {
-        for (let i = start; i <= end; i++) {
-          pageIndices.push(i);
+      const parts = range.split('-');
+      if (parts.length >= 2) {
+        const start = parseInt(parts[0]?.trim() || '0') - 1;
+        const end = parseInt(parts[1]?.trim() || '0') - 1;
+        if (!isNaN(start) && !isNaN(end) && start <= end && start >= 0) {
+          for (let i = start; i <= end; i++) {
+            pageIndices.push(i);
+          }
         }
       }
     } else {
       const pageNum = parseInt(range.trim()) - 1;
-      if (!isNaN(pageNum)) {
+      if (!isNaN(pageNum) && pageNum >= 0) {
         pageIndices.push(pageNum);
       }
     }
@@ -156,8 +160,9 @@ export class PDFSplitter {
       const size = `${(file.size / 1024 / 1024).toFixed(2)} MB`;
 
       return { pageCount, size };
-    } catch (error) {
-      throw new Error('PDF 파일 정보를 가져올 수 없습니다.');
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+      throw new Error(`PDF 파일 정보를 가져올 수 없습니다: ${errorMessage}`);
     }
   }
 }
