@@ -74,8 +74,8 @@ export default {
 				sm: 'calc(var(--radius) - 4px)'
 			},
 			backgroundImage: {
-				'gradient-primary': 'var(--gradient-primary)',
-				'gradient-soft': 'var(--gradient-soft)'
+				'gradient-primary': 'linear-gradient(135deg, hsl(var(--primary)), hsl(var(--secondary)))',
+				'gradient-soft': 'linear-gradient(135deg, hsl(var(--background)), hsl(var(--primary) / 0.1))'
 			},
 			boxShadow: {
 				'soft': 'var(--shadow-soft)',
