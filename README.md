@@ -1,73 +1,103 @@
-# Welcome to your Lovable project
+# Maeng PDF - PDF 변환 및 편집 도구
 
-## Project info
+다양한 파일 형식을 PDF로 변환하고, PDF를 다른 형식으로 변환하며, PDF 병합 및 분할 기능을 제공하는 웹 애플리케이션입니다.
 
-**URL**: https://lovable.dev/projects/55620348-2f43-42c4-b277-5ec8287a47d2
+## 주요 기능
 
-## How can I edit this code?
+### 📄 파일을 PDF로 변환
+- **Word 문서** (.doc, .docx) → PDF
+- **Excel 스프레드시트** (.xls, .xlsx) → PDF  
+- **PowerPoint 프레젠테이션** (.ppt, .pptx) → PDF
+- **이미지 파일** (.jpg, .jpeg, .png, .bmp, .tiff) → PDF
 
-There are several ways of editing your application.
+### 🔄 PDF를 다른 형식으로 변환
+- PDF → Word 문서
+- PDF → Excel 스프레드시트
+- PDF → PowerPoint 프레젠테이션
+- PDF → 이미지 파일
 
-**Use Lovable**
+### 🔗 PDF 병합
+- 여러 PDF 파일을 하나로 합치기
+- 드래그 앤 드롭으로 파일 순서 변경
+- 미리보기 기능 제공
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/55620348-2f43-42c4-b277-5ec8287a47d2) and start prompting.
+### ✂️ PDF 분할
+- 하나의 PDF를 여러 파일로 나누기
+- 페이지별 분할
+- 특정 페이지 범위로 분할
 
-Changes made via Lovable will be committed automatically to this repo.
+## 기술 스택
 
-**Use your preferred IDE**
+- **프론트엔드**: React 18, TypeScript
+- **빌드 도구**: Vite
+- **UI 라이브러리**: shadcn/ui, Tailwind CSS
+- **상태 관리**: React Hooks
+- **파일 업로드**: react-dropzone
+- **아이콘**: Lucide React
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## 설치 및 실행
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+### 요구사항
+- Node.js 18.0.0 이상
+- pnpm (권장) 또는 npm
 
-Follow these steps:
+### 설치 방법
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+```bash
+# 저장소 클론
+git clone <repository-url>
+cd maeng-pdf
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+# 의존성 설치
+pnpm install
 
-# Step 3: Install the necessary dependencies.
-npm i
+# 개발 서버 실행
+pnpm dev
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
+# 빌드
+pnpm build
+
+# 프로덕션 서버 실행
+pnpm preview
 ```
 
-**Edit a file directly in GitHub**
+### 개발 환경 설정
+개발 서버는 기본적으로 `http://localhost:8080`에서 실행됩니다.
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+## 사용법
 
-**Use GitHub Codespaces**
+1. **파일 업로드**: 변환하고자 하는 파일을 드래그 앤 드롭하거나 클릭하여 선택
+2. **변환 옵션 선택**: 원하는 출력 형식 및 품질 설정
+3. **변환 실행**: '변환 시작' 버튼을 클릭하여 변환 진행
+4. **파일 다운로드**: 변환 완료 후 결과 파일 다운로드
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## 프로젝트 구조
 
-## What technologies are used for this project?
+```
+src/
+├── components/          # React 컴포넌트
+│   ├── ui/             # shadcn/ui 기본 컴포넌트
+│   ├── FileUpload.tsx  # 파일 업로드 컴포넌트
+│   ├── PDFConverter.tsx # 메인 변환기 컴포넌트
+│   ├── PDFMerger.tsx   # PDF 병합 컴포넌트
+│   └── PDFSplitter.tsx # PDF 분할 컴포넌트
+├── hooks/              # 커스텀 React 훅
+├── lib/                # 유틸리티 함수
+└── pages/              # 페이지 컴포넌트
+```
 
-This project is built with:
+## 기여하기
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+1. 이 저장소를 포크합니다
+2. 기능 브랜치를 생성합니다 (`git checkout -b feature/amazing-feature`)
+3. 변경사항을 커밋합니다 (`git commit -m 'Add some amazing feature'`)
+4. 브랜치에 푸시합니다 (`git push origin feature/amazing-feature`)
+5. Pull Request를 생성합니다
 
-## How can I deploy this project?
+## 라이선스
 
-Simply open [Lovable](https://lovable.dev/projects/55620348-2f43-42c4-b277-5ec8287a47d2) and click on Share -> Publish.
+이 프로젝트는 MIT 라이선스 하에 있습니다. 자세한 내용은 [LICENSE](LICENSE) 파일을 참조하세요.
 
-## Can I connect a custom domain to my Lovable project?
+## 문의 및 지원
 
-Yes, you can!
-
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
-
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/tips-tricks/custom-domain#step-by-step-guide)
+문제가 발생하거나 기능 요청이 있으시면 [Issues](../../issues)를 통해 알려주세요.
