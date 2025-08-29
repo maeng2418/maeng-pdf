@@ -1,0 +1,242 @@
+"use client";
+
+import { useState, useCallback } from "react";
+import { useDropzone } from "react-dropzone";
+import { Card } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Progress } from "@/components/ui/progress";
+import { useToast } from "@/hooks/use-toast";
+import { Upload, File, X, CheckCircle } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { ConversionOptions } from "@/types/conversion";
+
+interface FileUploadProps {
+  acceptedTypes: string;
+  conversionType: "to-pdf" | "from-pdf";
+  conversionOptions: ConversionOptions;
+}
+
+interface UploadedFile {
+  file: File;
+  id: string;
+  progress: number;
+  status: "uploading" | "success" | "error";
+}
+
+export const FileUpload = ({ acceptedTypes, conversionType, conversionOptions }: FileUploadProps) => {
+  const [files, setFiles] = useState<UploadedFile[]>([]);
+  const [isConverting, setIsConverting] = useState(false);
+  const { toast } = useToast();
+
+  const onDrop = useCallback(
+    (acceptedFiles: File[]) => {
+      const newFiles = acceptedFiles.map((file) => ({
+        file,
+        id: Math.random().toString(36).substring(2, 11),
+        progress: 0,
+        status: "uploading" as const,
+      }));
+
+      setFiles((prev) => [...prev, ...newFiles]);
+
+      // 시뮬레이션된 업로드 진행률
+      newFiles.forEach((uploadFile) => {
+        let progress = 0;
+        const interval = setInterval(() => {
+          progress += Math.random() * 20;
+          if (progress >= 100) {
+            progress = 100;
+            setFiles((prev) =>
+              prev.map((f) =>
+                f.id === uploadFile.id
+                  ? { ...f, progress: 100, status: "success" }
+                  : f
+              )
+            );
+            clearInterval(interval);
+          } else {
+            setFiles((prev) =>
+              prev.map((f) =>
+                f.id === uploadFile.id ? { ...f, progress: Math.floor(progress) } : f
+              )
+            );
+          }
+        }, 200);
+      });
+    },
+    []
+  );
+
+  const { getRootProps, getInputProps, isDragActive } = useDropzone({
+    onDrop,
+    accept: {
+      'image/*': ['.jpg', '.jpeg', '.png', '.bmp', '.tiff', '.gif'],
+      'application/pdf': ['.pdf'],
+      'application/msword': ['.doc'],
+      'application/vnd.openxmlformats-officedocument.wordprocessingml.document': ['.docx'],
+      'application/vnd.ms-excel': ['.xls'],
+      'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet': ['.xlsx'],
+      'application/vnd.ms-powerpoint': ['.ppt'],
+      'application/vnd.openxmlformats-officedocument.presentationml.presentation': ['.pptx']
+    },
+    multiple: true,
+  });
+
+  const removeFile = (id: string) => {
+    setFiles((prev) => prev.filter((f) => f.id !== id));
+  };
+
+  const handleConvert = async () => {
+    if (files.length === 0) {
+      toast({
+        title: "파일을 선택해주세요",
+        description: "변환할 파일을 먼저 업로드해주세요.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsConverting(true);
+    
+    try {
+      const { PDFConverter } = await import("@/lib/pdf-converter");
+      const fileList = files.map(f => f.file);
+      let resultBlob: Blob;
+
+      if (conversionType === "to-pdf") {
+        const imageFiles = fileList.filter(file => PDFConverter.isImageFile(file));
+        const wordFiles = fileList.filter(file => PDFConverter.isWordFile(file));
+        const excelFiles = fileList.filter(file => PDFConverter.isExcelFile(file));
+
+        const pdfOptions = {
+          quality: conversionOptions.quality[0],
+          pageSize: conversionOptions.pageSize,
+          orientation: conversionOptions.orientation,
+          password: conversionOptions.password && conversionOptions.passwordValue.trim() !== '' ? conversionOptions.passwordValue : undefined
+        };
+
+        if (imageFiles.length > 0) {
+          resultBlob = await PDFConverter.imagesToPDF(imageFiles, pdfOptions);
+        } else if (wordFiles.length > 0) {
+          resultBlob = await PDFConverter.wordToPDF(wordFiles[0], pdfOptions);
+        } else if (excelFiles.length > 0) {
+          resultBlob = await PDFConverter.excelToPDF(excelFiles[0], pdfOptions);
+        } else {
+          throw new Error("지원되지 않는 파일 형식입니다.");
+        }
+
+        const url = URL.createObjectURL(resultBlob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = 'converted.pdf';
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+      }
+
+      setIsConverting(false);
+      toast({
+        title: "변환 완료!",
+        description: "파일이 성공적으로 변환되었습니다.",
+      });
+    } catch (error) {
+      setIsConverting(false);
+      toast({
+        title: "변환 실패",
+        description: error instanceof Error ? error.message : "변환 중 오류가 발생했습니다.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  return (
+    <div className="space-y-6">
+      <Card className="shadow-card border-2 border-dashed border-upload-border bg-upload-zone">
+        <div
+          {...getRootProps()}
+          className={cn(
+            "p-12 text-center cursor-pointer transition-all duration-300 rounded-lg",
+            isDragActive && "border-primary bg-primary/5 scale-105"
+          )}
+        >
+          <input {...getInputProps()} />
+          <div className="flex flex-col items-center space-y-4">
+            <Upload className={cn(
+              "w-16 h-16 transition-colors duration-300",
+              isDragActive ? "text-primary" : "text-muted-foreground"
+            )} />
+            <div>
+              <h3 className="text-xl font-semibold mb-2">
+                {isDragActive
+                  ? "파일을 여기에 놓으세요"
+                  : "파일을 드래그하거나 클릭하여 업로드"}
+              </h3>
+              <p className="text-muted-foreground">
+                지원 형식: {acceptedTypes.replace(/\./g, "").toUpperCase()}
+              </p>
+            </div>
+            <Button variant="outline" size="lg">
+              파일 선택
+            </Button>
+          </div>
+        </div>
+      </Card>
+
+      {files.length > 0 && (
+        <Card className="p-6 shadow-soft">
+          <h3 className="text-lg font-semibold mb-4">업로드된 파일</h3>
+          <div className="space-y-3">
+            {files.map((uploadFile) => (
+              <div
+                key={uploadFile.id}
+                className="flex items-center justify-between p-3 bg-muted rounded-lg"
+              >
+                <div className="flex items-center space-x-3 flex-1">
+                  <File className="w-5 h-5 text-muted-foreground" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium truncate">
+                      {uploadFile.file.name}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {(uploadFile.file.size / 1024 / 1024).toFixed(2)} MB
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center space-x-3">
+                  {uploadFile.status === "uploading" && (
+                    <div className="w-24">
+                      <Progress value={uploadFile.progress} className="h-2" />
+                    </div>
+                  )}
+                  {uploadFile.status === "success" && (
+                    <CheckCircle className="w-5 h-5 text-success" />
+                  )}
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => removeFile(uploadFile.id)}
+                  >
+                    <X className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+          
+          <div className="mt-6 flex justify-center">
+            <Button 
+              onClick={handleConvert}
+              disabled={isConverting || files.some(f => f.status === "uploading")}
+              size="lg"
+              className="min-w-32"
+            >
+              {isConverting ? "변환 중..." : "변환 시작"}
+            </Button>
+          </div>
+        </Card>
+      )}
+    </div>
+  );
+};
