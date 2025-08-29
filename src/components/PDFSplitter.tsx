@@ -38,6 +38,16 @@ export const PDFSplitter = () => {
         variant: "destructive",
       });
     }
+    
+    // Reset input value to allow selecting the same file again
+    event.target.value = '';
+  };
+
+  const triggerFileSelect = () => {
+    const fileInput = document.getElementById('pdf-split-upload') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.click();
+    }
   };
 
   const handleSplit = async () => {
@@ -178,14 +188,17 @@ export const PDFSplitter = () => {
             type="file"
             accept=".pdf"
             onChange={handleFileUpload}
-            className="hidden"
+            className="sr-only"
             id="pdf-split-upload"
           />
-          <label htmlFor="pdf-split-upload">
-            <Button variant="outline" size="lg" className="cursor-pointer">
-              PDF 파일 선택
-            </Button>
-          </label>
+          <Button 
+            variant="outline" 
+            size="lg" 
+            onClick={triggerFileSelect}
+            type="button"
+          >
+            PDF 파일 선택
+          </Button>
         </div>
       </Card>
 

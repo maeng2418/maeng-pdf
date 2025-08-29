@@ -43,6 +43,16 @@ export const PDFMerger = () => {
     }));
 
     setFiles(prev => [...prev, ...newFiles]);
+    
+    // Reset input value to allow selecting the same files again
+    event.target.value = '';
+  };
+
+  const triggerFileSelect = () => {
+    const fileInput = document.getElementById('pdf-upload') as HTMLInputElement;
+    if (fileInput) {
+      fileInput.click();
+    }
   };
 
   const removeFile = (id: string) => {
@@ -150,14 +160,17 @@ export const PDFMerger = () => {
             multiple
             accept=".pdf"
             onChange={handleFileUpload}
-            className="hidden"
+            className="sr-only"
             id="pdf-upload"
           />
-          <label htmlFor="pdf-upload">
-            <Button variant="outline" size="lg" className="cursor-pointer">
-              PDF 파일 선택
-            </Button>
-          </label>
+          <Button 
+            variant="outline" 
+            size="lg" 
+            onClick={triggerFileSelect}
+            type="button"
+          >
+            PDF 파일 선택
+          </Button>
         </div>
       </Card>
 
