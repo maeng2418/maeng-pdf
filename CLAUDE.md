@@ -107,3 +107,16 @@ The project uses TypeScript in strict mode with Next.js optimizations. Key setti
 - Consistent error handling with user-friendly messages
 - File type detection based on extensions and MIME types
 - Progress tracking for long-running operations
+- Props-based state management for cross-component communication
+- Centralized conversion options management in PDFConverter component
+
+### State Management Architecture
+
+The application uses a centralized state management pattern for conversion options:
+
+- **PDFConverter**: Main component that manages conversion state for both "to-pdf" and "from-pdf" operations
+- **ConversionOptions**: Props-based component that receives state and update functions from parent
+- **FileUpload**: Receives conversion options as props and applies them during PDF generation
+- **Type Safety**: All conversion options are typed using `src/types/conversion.ts`
+
+This ensures that user settings (including password protection) are properly propagated from UI to the actual conversion logic.

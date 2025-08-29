@@ -9,6 +9,7 @@
 - **Excel 스프레드시트** (.xls, .xlsx) → PDF  
 - **PowerPoint 프레젠테이션** (.ppt, .pptx) → PDF
 - **이미지 파일** (.jpg, .jpeg, .png, .bmp, .tiff) → PDF
+- **🔒 비밀번호 보호**: 생성되는 PDF에 암호화 적용 가능
 
 ### 🔄 PDF를 다른 형식으로 변환
 - PDF → Word 문서
@@ -28,12 +29,14 @@
 
 ## 기술 스택
 
-- **프론트엔드**: React 18, TypeScript
-- **빌드 도구**: Vite
+- **프론트엔드**: React 18, TypeScript, Next.js 15
 - **UI 라이브러리**: shadcn/ui, Tailwind CSS
 - **상태 관리**: React Hooks
 - **파일 업로드**: react-dropzone
+- **PDF 처리**: pdf-lib-with-encrypt, jsPDF, pdfjs-dist
+- **문서 변환**: mammoth (Word), xlsx (Excel)
 - **아이콘**: Lucide React
+- **테마**: next-themes (라이트/다크 모드)
 
 ## 설치 및 실행
 
@@ -58,32 +61,49 @@ pnpm dev
 pnpm build
 
 # 프로덕션 서버 실행
-pnpm preview
+pnpm start
 ```
 
 ### 개발 환경 설정
-개발 서버는 기본적으로 `http://localhost:8080`에서 실행됩니다.
+개발 서버는 기본적으로 `http://localhost:3000`에서 실행됩니다.
 
 ## 사용법
 
 1. **파일 업로드**: 변환하고자 하는 파일을 드래그 앤 드롭하거나 클릭하여 선택
-2. **변환 옵션 선택**: 원하는 출력 형식 및 품질 설정
+2. **변환 옵션 선택**: 
+   - PDF 품질, 페이지 크기, 방향 설정
+   - 🔒 **비밀번호 보호**: 스위치를 활성화하고 비밀번호 입력
 3. **변환 실행**: '변환 시작' 버튼을 클릭하여 변환 진행
-4. **파일 다운로드**: 변환 완료 후 결과 파일 다운로드
+4. **파일 다운로드**: 변환 완료 후 결과 파일 다운로드 (암호화된 경우 비밀번호 필요)
 
 ## 프로젝트 구조
 
 ```
 src/
-├── components/          # React 컴포넌트
-│   ├── ui/             # shadcn/ui 기본 컴포넌트
-│   ├── FileUpload.tsx  # 파일 업로드 컴포넌트
-│   ├── PDFConverter.tsx # 메인 변환기 컴포넌트
-│   ├── PDFMerger.tsx   # PDF 병합 컴포넌트
-│   └── PDFSplitter.tsx # PDF 분할 컴포넌트
-├── hooks/              # 커스텀 React 훅
-├── lib/                # 유틸리티 함수
-└── pages/              # 페이지 컴포넌트
+├── app/                    # Next.js App Router 페이지
+│   ├── api/               # API 라우트 (PDF 처리)
+│   ├── layout.tsx         # 루트 레이아웃 (테마 제공자 포함)
+│   ├── page.tsx           # 홈페이지
+│   └── globals.css        # 전역 스타일
+├── components/            # React 컴포넌트
+│   ├── ui/               # shadcn/ui 기본 컴포넌트
+│   ├── PDFConverter.tsx  # 메인 탭 인터페이스 컴포넌트
+│   ├── FileUpload.tsx    # 드래그 앤 드롭 파일 업로드
+│   ├── ConversionOptions.tsx # 변환 설정 (비밀번호 보호 포함)
+│   ├── PDFMerger.tsx     # PDF 병합 기능
+│   ├── PDFSplitter.tsx   # PDF 분할 기능
+│   ├── theme-provider.tsx # 다크/라이트 테마 컨텍스트
+│   └── theme-toggle.tsx  # 테마 전환 버튼
+├── lib/                  # 유틸리티 라이브러리
+│   ├── pdf-converter.ts  # 핵심 PDF 변환 로직 (암호화 포함)
+│   ├── pdf-merger.ts     # PDF 병합 유틸리티
+│   ├── pdf-splitter.ts   # PDF 분할 유틸리티
+│   └── utils.ts          # Tailwind 클래스 유틸리티
+├── hooks/                # 커스텀 React 훅
+│   ├── use-mobile.tsx    # 모바일 감지 훅
+│   └── use-toast.ts      # 토스트 알림 훅
+└── types/                # TypeScript 타입 정의
+    └── conversion.ts     # 변환 옵션 타입
 ```
 
 ## 기여하기

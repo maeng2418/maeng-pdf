@@ -1,13 +1,19 @@
 "use client";
 
 import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Slider } from "@/components/ui/slider";
 import { Switch } from "@/components/ui/switch";
-import { Settings, Lock } from "lucide-react";
-import { Input } from "@/components/ui/input";
 import { ConversionOptions as ConversionOptionsType } from "@/types/conversion";
+import { Settings } from "lucide-react";
 
 interface ConversionOptionsProps {
   type: "to-pdf" | "from-pdf";
@@ -15,7 +21,11 @@ interface ConversionOptionsProps {
   onOptionsChange: (options: ConversionOptionsType) => void;
 }
 
-export const ConversionOptions = ({ type, options, onOptionsChange }: ConversionOptionsProps) => {
+export const ConversionOptions = ({
+  type,
+  options,
+  onOptionsChange,
+}: ConversionOptionsProps) => {
   const updateOptions = (newOptions: Partial<ConversionOptionsType>) => {
     onOptionsChange({ ...options, ...newOptions });
   };
@@ -27,7 +37,7 @@ export const ConversionOptions = ({ type, options, onOptionsChange }: Conversion
           <Settings className="w-5 h-5 text-primary" />
           <h3 className="text-lg font-semibold">변환 옵션</h3>
         </div>
-        
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
             <Label htmlFor="quality">PDF 품질</Label>
@@ -48,10 +58,15 @@ export const ConversionOptions = ({ type, options, onOptionsChange }: Conversion
               </div>
             </div>
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="page-size">페이지 크기</Label>
-            <Select value={options.pageSize} onValueChange={(value) => updateOptions({ pageSize: value as any })}>
+            <Select
+              value={options.pageSize}
+              onValueChange={(value) =>
+                updateOptions({ pageSize: value as any })
+              }
+            >
               <SelectTrigger>
                 <SelectValue placeholder="페이지 크기 선택" />
               </SelectTrigger>
@@ -63,10 +78,15 @@ export const ConversionOptions = ({ type, options, onOptionsChange }: Conversion
               </SelectContent>
             </Select>
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="orientation">페이지 방향</Label>
-            <Select value={options.orientation} onValueChange={(value) => updateOptions({ orientation: value as any })}>
+            <Select
+              value={options.orientation}
+              onValueChange={(value) =>
+                updateOptions({ orientation: value as any })
+              }
+            >
               <SelectTrigger>
                 <SelectValue placeholder="방향 선택" />
               </SelectTrigger>
@@ -76,31 +96,36 @@ export const ConversionOptions = ({ type, options, onOptionsChange }: Conversion
               </SelectContent>
             </Select>
           </div>
-          
+
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <Label htmlFor="password-protect">비밀번호 보호</Label>
               <Switch
                 id="password-protect"
                 checked={options.password}
-                onCheckedChange={(checked) => updateOptions({ password: checked })}
+                onCheckedChange={(checked) =>
+                  updateOptions({ password: checked, passwordValue: "" })
+                }
               />
             </div>
-            {options.password && (
+            {
               <div className="space-y-2">
-                <Label htmlFor="password-input" className="flex items-center gap-2">
-                  <Lock className="w-4 h-4" />
-                  비밀번호
-                </Label>
                 <Input
                   id="password-input"
                   type="password"
-                  placeholder="PDF 보호 비밀번호를 입력하세요"
+                  placeholder={
+                    options.password
+                      ? "PDF 보호 비밀번호를 입력하세요"
+                      : "비밀번호 보호 사용 안 함"
+                  }
                   value={options.passwordValue}
-                  onChange={(e) => updateOptions({ passwordValue: e.target.value })}
+                  onChange={(e) =>
+                    updateOptions({ passwordValue: e.target.value })
+                  }
+                  disabled={!options.password}
                 />
               </div>
-            )}
+            }
           </div>
         </div>
       </Card>
@@ -113,11 +138,14 @@ export const ConversionOptions = ({ type, options, onOptionsChange }: Conversion
         <Settings className="w-5 h-5 text-primary" />
         <h3 className="text-lg font-semibold">변환 옵션</h3>
       </div>
-      
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
           <Label htmlFor="output-format">출력 형식</Label>
-          <Select value={options.outputFormat} onValueChange={(value) => updateOptions({ outputFormat: value })}>
+          <Select
+            value={options.outputFormat}
+            onValueChange={(value) => updateOptions({ outputFormat: value })}
+          >
             <SelectTrigger>
               <SelectValue placeholder="출력 형식 선택" />
             </SelectTrigger>
@@ -130,7 +158,7 @@ export const ConversionOptions = ({ type, options, onOptionsChange }: Conversion
             </SelectContent>
           </Select>
         </div>
-        
+
         {(options.outputFormat === "jpg" || options.outputFormat === "png") && (
           <div className="space-y-2">
             <Label htmlFor="image-quality">이미지 품질</Label>
@@ -152,10 +180,13 @@ export const ConversionOptions = ({ type, options, onOptionsChange }: Conversion
             </div>
           </div>
         )}
-        
+
         <div className="space-y-2">
           <Label htmlFor="page-range">페이지 범위</Label>
-          <Select value={options.pageRange} onValueChange={(value) => updateOptions({ pageRange: value })}>
+          <Select
+            value={options.pageRange}
+            onValueChange={(value) => updateOptions({ pageRange: value })}
+          >
             <SelectTrigger>
               <SelectValue placeholder="페이지 범위 선택" />
             </SelectTrigger>
@@ -166,13 +197,15 @@ export const ConversionOptions = ({ type, options, onOptionsChange }: Conversion
             </SelectContent>
           </Select>
         </div>
-        
+
         <div className="flex items-center justify-between">
           <Label htmlFor="maintain-layout">레이아웃 유지</Label>
-          <Switch 
-            id="maintain-layout" 
+          <Switch
+            id="maintain-layout"
             checked={options.maintainLayout}
-            onCheckedChange={(checked) => updateOptions({ maintainLayout: checked })}
+            onCheckedChange={(checked) =>
+              updateOptions({ maintainLayout: checked })
+            }
           />
         </div>
       </div>
